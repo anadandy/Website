@@ -1,0 +1,105 @@
+---
+title: "Project 1"
+author: "Ana Dandy"
+date: "03/15/2020"
+output: pdf_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE, eval = TRUE, fig.align = "center", warning = F, message = F,
+tidy=TRUE, tidy.opts=list(width.cutoff=60), R.options=list(max.print=100))
+```
+
+
+_**For this project, I selected SAT and ACT exam scores in the state of Texas for the class of 2017, organized by school district. I chose this data because as I was scrolling through hundreds of datasets, the same information for California appeared and I decided to do some research and see if Texas had the same information available. Once I found the data, I became very intrigued by how the data differs so greatly over the whole state. The Texas Education Agency website had this information for several graduation years so I decided to choose my own high school graduation year. **_
+
+
+```{r}
+library(ggplot2)
+library(tidyverse)
+sat_district_data_class_2017<-read.csv("sat_district_data_class_2017.csv")
+act_district_data_class_2017<-read.csv("act_district_data_class_2017.csv")
+glimpse(sat_district_data_class_2017)
+glimpse(act_district_data_class_2017)
+sat.data<- sat_district_data_class_2017 %>% filter(Group=="All Students") %>% select(DistName, CntyName, ERW, Math, Total, "Math.SAT"=Math)%>%glimpse()
+act.data<- act_district_data_class_2017 %>% filter(Group=="All Students")%>%separate(English,into = c("del", "English"), sep=1) %>%separate(Math,into = c("del", "Math"), sep=1)%>%separate(Reading,into = c("del", "Reading"), sep=1) %>%separate(Science,into = c("del", "Science"), sep=1)%>%separate(Compos,into = c("del", "Compos"), sep=1) %>%select(DistName, English, Math, Reading, Science, Compos)%>%glimpse()
+```
+
+_**The datasets initially contained over 40 different variables for each school district which separated the data by gender, ethnicity, SES, and many other categories; however, for the sake of this project, I was interested in the information from the entire student body. I filtered the data so that I would continue the project using the data for all students in each district, and I also selected for the specific columns that I wished to analyze. Both datasets contain the school district name (“DistName”) as well as the county that the school is in (“CntyName”). The SAT dataset contains columns: “ERW”, “Math.SAT” (which was originally named simply “Math” however I modified it to avoid confusion with the “Math” column in the ACT dataset), and “Totals”. “ERW” shows the evidence-based reading and writing subscore, “Math.SAT” shows the mathematics subscore, and “Totals” shows the total SAT score in a range from 400-1600. The ACT dataset contains columns: “English”, “Math”, “Reading”, “Science”, and “Compos”. The first four categories show the subscore for that particular section of the ACT and “Compos” is the composite score, in a range from 1-36. Because the SAT and ACT are two similar standardized tests, I believe that there will probably be a positive correlation between the two exam scores.**_
+
+
+```{r}
+full.data<-full_join(sat.data,act.data, by="DistName")
+glimpse(full.data)
+full.data$English=as.numeric(full.data$English)
+full.data$Math=as.numeric(full.data$Math)
+full.data$Reading=as.numeric(full.data$Reading)
+full.data$Science=as.numeric(full.data$Science)
+full.data$Compos=as.numeric(full.data$Compos)
+full.data <- full.data %>% na.omit() %>% arrange(DistName)
+summary(full.data)
+glimpse(full.data)
+```
+
+_**I decided to do a full join of my two datasets because they share two different categorical variables, school district and county. After merging, I decided to drop any cases where a school district was missing data from one of the two datasets/exams, as well as arrange the whole dataset in alphabetical order based on school district. I did this because the SAT is more common than the ACT, and many school districts did not have any ACT data to report. The scores reported for the ACT were not numerical, so at this time I converted them into numerical values so that I could perform summary statistics on them.**_
+
+
+```{r}
+mean(full.data$Total)
+mean_sat <-function(Total) {Total-mean(full.data$Total)}
+mean(full.data$Compos)
+mean_act <-function(Compos) {Compos-mean(full.data$Compos)}
+full.data<-full.data%>%mutate(mean_SAT=mean_sat(Total),mean_ACT=mean_act(Compos))
+full.data<-full.data%>%mutate(relation_mean_SAT=case_when(Total>mean(Total)~"above",Total<mean(Total)~"below"))
+full.data<-full.data%>%mutate(relation_mean_ACT=case_when(Compos>mean(Compos)~"above",Compos<mean(Compos)~"below"))
+glimpse(full.data)
+```
+
+_**I created 2 new categorical variables and 2 new numerical values using the mutate function. For the categorical, I determined whether or not the school districts' exam scores were higher or lower than the mean of the entire dataset. If it was higher than the mean, an output of "above" was given, and if it was lower, an output of "below" was given. For the numberical varibles, I created a function that created new columns for both SAT and ACT showing how many points away they were from the mean of the total score for each exam. If the output was negative, it meant that they were below the average, and if it was positive, it meant that it was above. For example: in the A+ Academy school district, they were 142.48 points below the mean SAT score across the state.**_
+
+
+```{r}
+stats<-full.data%>%summarize_at(3:10,.funs = list(mean=mean,sd=sd,var=var,max=max,min=min,n.distinct=n_distinct,length=length,IQR=IQR,median=median))
+stats.grouped<-full.data%>%group_by(CntyName)%>%summarize_at(2:9,.funs = list(mean=mean,sd=sd,var=var,max=max,min=min,n.distinct=n_distinct,length=length,median=median))
+tidy.stats<-stats%>%pivot_longer(contains("_"), names_to = "name",values_to = "value")%>%separate(name, c("name","function"),sep="_")%>%pivot_wider(names_from = "function",values_from = "value")%>%glimpse()
+```
+
+_**In this section, I ran the summary statistics as well as my pivot_longer and pivot_wider. I ran mean, standard deviation, variance, maximum, minimum, n_distinct, length, IQR, and median. I ran them for my full data as well as grouped by county. Because I have so many numerical variables (8), I will only mention the results that I found interesting. I found it interesting that the standard deviation of all of the ACT subscores were all very close to one another, while there was a bit more variation among SAT subscores. Next, I found it interesting that the max scores of the SAT subscores differed greatly, while they had the same minimum values. Lastly, I found it interesting that the mean and median across all variables were practically the same number. For my pivot_longer and pivot_wider, I decided to clean up the table that was originally made that showed all of the stat functions. It began with 1 observation of 72 variables, and I was able to condense it into 8 observations of 10 variables.**_
+
+```{r}
+df<-full.data%>%na.omit%>%select_if(is.numeric)
+df<-full.data%>%na.omit%>%select("ERW","Math.SAT","Total","Reading","Math","English","Science","Compos")
+cor(df)
+tidycor<-cor(df)%>%as.data.frame%>%rownames_to_column%>%pivot_longer(-1,names_to="name",values_to="correlation")
+head(tidycor)
+tidycor%>%ggplot(aes(rowname,name,fill=correlation))+geom_tile()+ scale_fill_gradient2(low="red",mid="white",high="blue")+ geom_text(aes(label=round(correlation,2)),color = "black", size = 4)+ theme(axis.text.x = element_text(angle = 90, hjust = 1))+ coord_fixed()+xlab("")+ylab("")+ggtitle("Correlation Heatmap of SAT & ACT Scores")
+ggplot(data = full.data, aes(x = Total, y = Compos, color = CntyName)) + geom_point(size = 4) + theme(legend.position = "none")+xlab("SAT Score")+ylab("ACT Score")+ggtitle("SAT & ACT Score of All ISDs in Texas Colored by County")
+four.counties<-full.data%>%filter(CntyName %in% c("Travis County","Harris County","Dallas County","Guadalupe County"))%>%select(CntyName,Total)
+ggplot(four.counties, aes(CntyName,fill=CntyName))+geom_bar(aes(y=Total),stat="summary",fun.y="mean")+scale_y_continuous(breaks=seq(0, 1600, 100))+geom_errorbar(aes(y=Total),stat="summary",width=0.5)+ylab("Mean SAT Score")+ggtitle("Mean SAT Score for Four Counties in Texas")+scale_fill_brewer(palette = "BuPu")+xlab("County")
+```
+_**My correlation heatmap overall showed that all of my data had a high positive correlation associated with it. The lowest value was 0.54, which was the correlation between the ACT Math subscore and the SAT evidence-based reading and writing section. When not comparing a subscore to the overall score of the exam, the ACT Science and Reading sections showed the strongest correlaion of 0.9.**_
+
+_**For the scatterplot, I decided to plot all school districts in my dataset based on SAT and ACT score, and then colored by county. Because there are over 200 counties in my dataset, I decided to delete the legend because it over-crowded my plot. This plot followed the trend that I imagined it would; if a school district scored high on the SAT, it is likely that they also scored high on the ACT. There are a few execptions to this data; with Ore City ISD having an average SAT score of over 1300 but an ACT score of only about 18, and Latexo ISD who had an average ACT score of 32 but an ACT score just above 1000. There was also a very obvious outlier in the dataset who had an average SAT and ACT score above all the rest of the scoools, the Texas Academy of Math & Science, in Denton, TX. Overall, I was very satisfied by the results shown by the scatterplot.**_
+
+_**For the bar chart, I decided to select only 3 of the biggest counties in Texas, (Dallas, Harris, and Travis), as well as my home county (Guadalupe), to visualize the mean SAT score for each county. Travis county had the highest mean SAT score of 1059 and Harris county had the lowest with a mean SAT score of 989. I thought it was interesting to see that my home county preformed better than both Dallas and Harris counties, however; the small size of my home county may play a role in the higher mean SAT score.**_
+```{r}
+full.data1<-full.data%>%select(DistName,English,Math,Reading,Science)
+data.nums<-full.data1%>%select_if(is.numeric)%>%scale
+data.pca<-princomp(data.nums)
+names(data.pca)
+summary(data.pca, loadings=T)
+eigval<-data.pca$sdev^2
+varprop=round(eigval/sum(eigval),2)
+ggplot()+geom_bar(aes(y=varprop,x=1:4),stat="identity")+xlab("")+geom_path(aes(y=varprop,x=1:4))+geom_text(aes(x=1:4,y=varprop,label=round(varprop,3)),vjust=1,col="white",size=4)+ scale_y_continuous(breaks=seq(0,.8,.2),labels = scales::percent)+ scale_x_continuous(breaks=1:4)
+eigen(cor(data.nums))
+datadf<-data.frame(PC1=data.pca$scores[,1],PC2=data.pca$scores[,2])
+ggplot(datadf,aes(PC1,PC2))+geom_point()
+ISD<-full.data1$DistName
+data.pca$scores%>%as.data.frame%>%cbind(ISD,.)%>%top_n(3,Comp.1) #highest PC1
+data.pca$scores%>%as.data.frame%>%cbind(ISD,.)%>%top_n(3,wt=desc(Comp.1)) #lowest PC1
+data.pca$scores%>%as.data.frame%>%cbind(ISD,.)%>%top_n(3,Comp.2) #highest PC2
+data.pca$scores%>%as.data.frame%>%cbind(ISD,.)%>%top_n(3,wt=desc(Comp.2)) #lowest PC2
+data.pca$loadings[1:4,1:2]%>%as.data.frame%>%rownames_to_column%>%ggplot()+geom_hline(aes(yintercept=0),lty=2)+geom_vline(aes(xintercept=0),lty=2)+ylab("PC2")+xlab("PC1")+geom_segment(aes(x=0,y=0,xend=Comp.1,yend=Comp.2),arrow=arrow(),col="red")+geom_label(aes(x=Comp.1*1.1,y=Comp.2*1.1,label=rowname))
+```
+
+_**I decided to run a PCA on my data to see if there was a clear, visible, variance between the data. I decided to select the ACT subsections (Reading, Math, English, and Science) as my four variables to analyze. Upon viewing the scree plot, I decided to use PC1 and PC2, which account for 96% of my variance. The loadings for my data show that in PC1, there is a negative correlation across all variables, and in PC2, there is a positive correlation for Reading and Science, but negative for English and Reading. The PCA scatter plot shows that there is more variance in my data along PC1 than there is in PC2. This information makes sense, as PC1 accounts for 92% of the variance in my data. The PCA arrow plot shows me that all of my categories exhibit a negative loading for PC1, and Math and Science exhibit a positive loading for PC2 and English and Reading exhibit a negative loading for PC2, which was previously mentioned and shown.**_

@@ -1,0 +1,11 @@
+]0;/stor/home/amd5355/Website]0;amd5355@educcomp01: ~/Website[01;32mamd5355@educcomp01[00m:[01;34m~/Website[00m$ [K]0;amd5355@educcomp01: ~/Website[01;32mamd5355@educcomp01[00m:[01;34m~/Website[00m$ git --version
+git version 2.17.1
+]0;/stor/home/amd5355/Website]0;amd5355@educcomp01: ~/Website[01;32mamd5355@educcomp01[00m:[01;34m~/Website[00m$ cd ~/Desktop/PROJECT_DIRECTORY_NAME #iif you haven't already
+bash: cd: /stor/home/amd5355/Desktop/PROJECT_DIRECTORY_NAME: No such file or directory
+]0;/stor/home/amd5355/Website]0;amd5355@educcomp01: ~/Website[01;32mamd5355@educcomp01[00m:[01;34m~/Website[00m$ 
+]0;/stor/home/amd5355/Website]0;amd5355@educcomp01: ~/Website[01;32mamd5355@educcomp01[00m:[01;34m~/Website[00m$ git init #initialize local git resposiitory
+ in repository to be uploaded
+git commit -m "first website commit"
+git remote add origin https://github.com/USERNAME/WEBSITE_REPOSITORY.git #re
+git push origin masterInitialized empty Git repository in /stor/home/amd5355/Website/.git/
+]0;/stor/home/amd5355/Website]0;amd5355@educcomp01: ~/Website[01;32mamd5355@educcomp01[00m:[01;34m~/Website[00m$ git add . #add all files in repositoryy to be uploaded

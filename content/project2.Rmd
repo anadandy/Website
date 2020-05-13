@@ -1,0 +1,261 @@
+---
+title: "Project 2"
+output:
+  pdf_document: default
+  html_document: default
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+##Ana Dandy amd5355
+
+*Introduction: For this project, I found a dataset which has information about teenage birth rates in the United States for every state from 1990-2018. The categorical variable initally had 3 subgroups, 15-17 y/o, 15-19 y/o, and 18-19 y/o; and for this project, I decided to omit the 15-19 y/o entries so that I could have a binary response and so that I can look at the information as two parts rather than a part and a whole. I also decided to omit all of the entries from all other states in the US other than Texas to both reduce the number of entries I was working with, and to make the data more relevant and interesting considering it is our home state. This dataset contains both the state birth rates and the US birth rates for the corresponding group and year, both measured by number of teen births per 1,000 births. The dataset also contained the number of births annually for each of the groups in both the state and the country. In the end, I was working with 58 observations which contained information for all of the variables.*
+```{r}
+library(dplyr)
+library(tidyverse)
+library(sandwich)
+library(lmtest)
+library(plotROC)
+library(pROC)
+library(glmnet)
+teenbirth<-read.csv("NCHS.csv")
+teenbirth<-teenbirth%>%filter(State=="Texas")%>%filter(Age.Group..Years. !="15-19 years")
+head(teenbirth)
+```
+
+*1. MANOVA*
+```{r}
+##MANOVA
+man1<-manova(cbind(Year, State.Rate)~Age.Group..Years., data=teenbirth)
+summary(man1)
+summary.aov(man1)
+teenbirth%>%group_by(Age.Group..Years.)%>%summarize(mean(State.Rate),mean(Year))
+pairwise.t.test(teenbirth$State.Rate,teenbirth$Age.Group..Years.,p.adj="none")
+1-.95^4
+0.05/4
+```
+*I ran a MANOVA test to determine the effect of the Age Group of teen births (15-17 or 18-19 years old) on two variables, year and the state rate per 1,000 births. The initial MANOVA showed a significant difference, however, when I ran the univariate ANOVAs, it showed that only the state rate was significant. For this reason, I only ran a post-hoc test on the state rate, which showed that there is a significant difference between the groups. The category is binary so the groups that differ are the 15-17 year olds and the 18-19 year olds. I performed a total of 4 tests, there is an 18.5494% chance that there is at least one type I error, and the bonferroni correction is 0.0125. Because this data is collected from all teenage births across the state and country, this dataset likely fails most of the assumptions. The data that I have selected is every year from 1990 to 2018 in the state of Texas so it is not random. The only assumption that could potentially be met is the linear relationships among DVs because when you look at the datatable, you can see that teen births have been decreasing statewide over the years. *
+
+*2. RANDOMIZATION*
+```{r}
+#randomization, age group and state birth rate
+youngerteen <-c(48.0,50.0,50.5,50.8,51.2,49.9,47.9,46.2,44.2,42.8,41.6,38.9,38.3,37.0,36.6,35.4,35.3,35.4,35.0,32.8,29.3,25.6,23.4,21.1,18.8,16.7,15.1,12.9,11.4)
+olderteen<-c(112.2,119.2,119.9,118.3,117.0,115.8,113.3,111.7,111.6,110.0,109.6,107.0,105.2,101.8,101.0,100.3,102.7,103.1,99.8,95.5,86.5,79.0,76.6,72.0,67.7,63.0,56.5,51.1,47.1)
+teens<-data.frame(age=c(rep("youngerteen",29),rep("olderteen",29)),state.rate=c(youngerteen,olderteen))
+head(teens)
+
+ggplot(teens,aes(state.rate,fill=age))+geom_histogram(bins=5)+facet_wrap(~age,ncol=2)+theme(legend.position="none")
+
+teens%>%group_by(age)%>%
+  summarize(means=mean(state.rate))%>%summarize(`mean_diff:`=diff(means))
+head(perm1<-data.frame(age=teens$age,state.rate=sample(teens$state.rate)))
+perm1%>%group_by(age)%>%
+  summarize(means=mean(state.rate))%>%summarize(`mean_diff:`=diff(means))
+
+rand_dist<-vector()
+for(i in 1:5000){
+new<-data.frame(state.rate=sample(teens$state.rate),age=teens$age)
+rand_dist[i]<-mean(new[new$age=="youngerteen",]$state.rate)-
+mean(new[new$age=="olderteen",]$state.rate)}
+{hist(rand_dist,main="",ylab=""); abline(v = -60.42759,col="red")}
+
+mean(rand_dist>60.42759)*2
+```
+*I performed a randomization test between the age group, either 15-17 y/o which I named "youngerteen" and 18-19 y/o which I named "olderteen", and state birth rate per 1,000 births. The null hypothesis is: mean state birth rate is the same for younger and older teens and the alternative hypothesis is: mean state birth rate is different for younger and older teens. I calculated the mean difference to be -60.4276. I then randomized the data and created a histogram showing the results with a red line to be at -60.4276. As you can see, the red line does not appear on the graph because there are no mean differences which are as extreme as the computed mean difference value. This was confirmed by a t-test which showed that the p-value of this is 0, meaning we can reject the null hypothesis and say that there is a difference in mean birth rate between the two groups of teens.*
+
+*3. LINEAR REGRESSION*
+```{r}
+#linear regression
+teenbirth$State.Rate_c <- teenbirth$State.Rate - mean(teenbirth$State.Rate)
+teenbirth$Year_c <- teenbirth$Year - mean(teenbirth$Year)
+fit<-lm(State.Rate_c~Year_c*Age.Group..Years., data= teenbirth)
+summary(fit)
+t.test(data=teenbirth,State.Rate_c~Age.Group..Years.,var.eq=T)
+
+ggplot(teenbirth, aes(x=Year_c,y=State.Rate_c,group=Age.Group..Years.))+geom_point(aes(color=Age.Group..Years.))+geom_smooth(method="lm",formula = y~1,se=F,fullrange=T,aes(color=Age.Group..Years.))+theme(legend.position = c(.9,.91))+xlab("")
+```
+*For the linear regression, I attempted to determine the state birth rate per 1,000 births based on the year and the age group which the teens fell into (either 15-17 y/o or 18-19 y/o, as well as their interaction. The coefficients show that annually, the state birth rate is decreasing for 15-17 y/o by -1.4295. It also shows that the 18-19 year old group has a birth rate 60.4276 points higher than the mean birth rate for the 15-17 y/o group. Lastly, the slope for year on state rate is 0.9626 lower for 18-19 y/o compared to 15-17 y/o. All of the coefficients are significant.*
+
+```{r}
+new1<-teenbirth
+new1$Year_c<-mean(teenbirth$Year_c)
+new1$mean<-predict(fit,new1)
+new1$Year_c<-mean(teenbirth$Year_c)+sd(teenbirth$Year_c)
+new1$plus.sd<-predict(fit,new1)
+new1$Year_c<-mean(teenbirth$Year_c)-sd(teenbirth$Year_c)
+new1$minus.sd<-predict(fit,new1)
+
+mycols<-c("#619CFF","#F8766D","#00BA38")
+names(mycols)<-c("-1 sd","mean","+1 sd")
+mycols=as.factor(mycols)
+
+ggplot(teenbirth,aes(State.Rate_c,Year_c),group=mycols)+geom_point()+geom_line(data=new1,aes(y=mean,color="mean"))+geom_line(data=new1,aes(y=plus.sd,color="+1 sd"))+geom_line(data=new1,aes(y=minus.sd,color="-1 sd"))+scale_color_manual(values=mycols)+labs(color="Age Group (cont)")+theme(legend.position=c(.9,.2)) #Interaction Plot
+```
+*When I plotted the interaction, I unfortunately got a very hideous plot as the result. I believe that the reasoning behind this is that every year, there were only 2 state birth rates recorded; one for the 15-17 y/o and another for the 18-19 y/o group. The 18-19 y/o group always had a much higher birth rate, so the point in the graph where it spikes, is the location where the birth rates for the 15-16 y/o group were similar to that of the 18-19 y/o group.*
+
+```{r}
+resids<-lm(State.Rate_c~Year_c*Age.Group..Years., data= teenbirth)$residuals
+fitted<-lm(State.Rate_c~Year_c*Age.Group..Years., data= teenbirth)$fitted.values
+resids<-fit$residuals
+fitvals<-fit$fitted.values
+ggplot()+geom_point(aes(fitvals,resids))+geom_hline(yintercept=0, color='red') #Plot to check for homoskedasticity and linearity
+```
+*This plot is to check for homoskedasticity and linearity. The plot is not linear and exhibits heteroskedasticity.*
+
+```{r}
+ggplot()+geom_histogram(aes(resids), bins=20) #Plot to check for normality
+ggplot()+geom_qq(aes(sample=resids))+geom_qq_line(aes(sample=resids)) #Plot to check for normality
+
+cdf1<-ecdf(resids)
+x0<-resids[(which.max(abs(cdf1(resids)-pnorm(resids,sd=sd(resids)))))]
+y0<-cdf1(x0)
+y1<-pnorm(x0,sd=sd(resids))
+
+ggplot()+stat_ecdf(aes(x=resids),color="blue")+
+  stat_function(aes(x=resids),geom = "line",fun=pnorm, args=list(sd=sd(resids)))+
+  geom_segment(aes(x=x0,y=y0,xend=x0,yend=y1),color="red") #Plot to check for normality
+```
+*These plots show that the data generally follows normality; the histogram is mostly normally shaped, the qq-plot shows that most of the points fall along the line, and the normality curve only has one area that strays more than the rest of the plot off of the line.*
+
+```{r}
+fit2<-lm(State.Rate_c~Year_c*Age.Group..Years., data= teenbirth)
+bptest(fit2) #rejects null
+summary(fit2)$coef[,1:2]
+coeftest(fit2, vcov = vcovHC(fit2))[,1:2]
+```
+*The results of the BP test show that the p-value is less than 0.05 so you can therefore reject the null hypothesis and conclude that the data is heteroskedastic. After the robust standard error was conducted, the standard error for the intercept and year decreased, while the standard error for the 18-19 y/o group and the interaction increased.*
+
+```{r}
+(sum((teenbirth$State.Rate_c-mean(teenbirth$State.Rate_c))^2)-sum(fit$residuals^2))/sum((teenbirth$State.Rate_c-mean(teenbirth$State.Rate_c))^2)
+```
+*My model explains 97.09% of the variation in the outcome.*
+
+*4. BOOTSTRAPPING*
+```{r}
+#regression with bootstrap
+boot_dat<- sample_frac(teenbirth, replace=T)
+samp_distn<-replicate(5000, {
+boot_dat <- sample_frac(teenbirth, replace=T)
+fit3 <- lm(State.Rate_c~Year_c*Age.Group..Years., data=boot_dat)
+coef(fit3)
+})
+samp_distn %>% t %>% as.data.frame %>% summarize_all(sd)
+```
+*The bootstrapped SEs are: 0.5429 for the intercept, 0.08045 for the year, 1.6505 for the 18-19 y/o age group, and 0.2422 for the interaction. These numbers are all very similar to those computed in the robust SEs, but they are all slightly lower. Because these numbers are so similar, it is likely that the bootstrapped SEs will still have a p-value less than 0.05. These values differ more from the original SEs computed for this model. The values for the original SEs are as follows: 1.1467 for the intercept, 0.1371 for the year, 1.6217 for the 18-19 y/o group, and 0.1938 for the interaction.*
+
+*5. LOGISTIC REGRESSION*
+```{r}
+#logistic regression
+teenbirth<-teenbirth%>%mutate(AgeGroup=ifelse(Age.Group..Years.=="15-17 years",0,1))
+head(data)
+fit4<-glm(AgeGroup~Year+State.Rate,data=teenbirth,family = "binomial")
+coeftest(fit4)
+exp(coef(fit4))
+```
+*The coefficient estimates for my regression are: -6.1539e+03 for the intercept, 3.0299 for the year, and 1.3193 for the state birth rate and none of them are significant. This means that you fail to reject the null hypothesis and there is not a significant relationship between the age group and year or age group and state rate.*
+
+```{r}
+prob<-predict(fit4,type="response")
+pred<-ifelse(prob>.5,1,0)
+table(prediction=pred,truth=teenbirth$AgeGroup)%>%addmargins()
+(29+29)/58 #accuracy
+29/29 #tpr (sensitivity)
+29/29 #tnr (specificity)
+29/29 #ppv (precision)
+```
+*The accuracy, TPR, TNR, and PPV for my model are all equal to 1. This means that the model will always accurately calculate the true positive rate and the true negative rate. The precision also means that, given the year and state birth rate, they will always be categorized correcting into either 15-17 y/o or 18-19 y/o.*
+
+```{r}
+teenbirth$logit<-predict(fit4,type="link")
+ggplot(teenbirth,aes(logit, fill=as.factor(AgeGroup)))+geom_density(alpha=.3)+
+  theme(legend.position=c(.63,.85))+geom_vline(xintercept=0)+xlab("predictor (logit)")
+```
+*This data created a very nice density plot that has no overlap between the two age groups, meaning that the model is doing a good job. Every person/group who is measured to be 15-17 or 18-19 is always correctly categorized.*
+
+```{r}
+ROCplot<-ggplot(teenbirth)+geom_roc(aes(d=AgeGroup,m=prob), n.cuts=0) 
+ROCplot
+calc_auc(ROCplot)
+```
+*The ROC plot generated a perfect right angle, which is what was expected to happen due to the nature of the confusion matrix. The AUC was 1, which is expected based on the graph. This means that the model is perfectly calculating the TPR result. Every person/group that is measured to be 15-17 or 18-19 is always correctly categorized.*
+
+```{r}
+class_diag <- function(probs,truth){
+#CONFUSION MATRIX: CALCULATE ACCURACY, TPR, TNR, PPV
+tab<-table(factor(probs>.5,levels=c("FALSE","TRUE")),truth)
+acc=sum(diag(tab))/sum(tab)
+sens=tab[2,2]/colSums(tab)[2]
+spec=tab[1,1]/colSums(tab)[1]
+ppv=tab[2,2]/rowSums(tab)[2]
+if(is.numeric(truth)==FALSE & is.logical(truth)==FALSE) truth<-as.numeric(truth)-1
+#CALCULATE EXACT AUC
+ord<-order(probs, decreasing=TRUE)
+probs <- probs[ord]; truth <- truth[ord]
+TPR=cumsum(truth)/max(1,sum(truth))
+FPR=cumsum(!truth)/max(1,sum(!truth))
+dup<-c(probs[-1]>=probs[-length(probs)], FALSE)
+TPR<-c(0,TPR[!dup],1); FPR<-c(0,FPR[!dup],1)
+n <- length(TPR)
+auc<- sum( ((TPR[-1]+TPR[-n])/2) * (FPR[-1]-FPR[-n]) )
+data.frame(acc,sens,spec,ppv,auc)
+} 
+
+class_diag(prob,teenbirth$AgeGroup)
+set.seed(1234)
+k=10 #choose number of folds
+data<-teenbirth[sample(nrow(teenbirth)),] #randomly order rows
+folds<-cut(seq(1:nrow(teenbirth)),breaks=k,labels=F) #create folds
+diags<-NULL
+for(i in 1:k){
+## Create training and test sets
+train<-data[folds!=i,]
+test<-data[folds==i,]
+truth<-test$AgeGroup ## Truth labels for fold i
+## Train model on training set (all but fold i)
+fit5<-glm(AgeGroup~Year+State.Rate,data=train,family="binomial")
+## Test model on test set (fold i)
+probs<-predict(fit5,newdata = test,type="response")
+## Get diagnostics for fold i
+diags<-rbind(diags,class_diag(probs,truth))
+}
+summarize_all(diags,mean) #average diagnostics across all k folds
+```
+
+*The 10-fold CV once again gave an output of 1 for accuracy, sensitivity and recall.*
+
+*6. LASSO*
+```{r}
+teenbirth2<-read.csv("NCHS.csv")
+teenbirth2<-teenbirth%>%filter(State=="Texas")%>%filter(Age.Group..Years. !="15-19 years")%>%select(-c(Unit,State,State.Rate_c,Year_c,logit,Age.Group..Years.))
+head(teenbirth2)
+y<-as.matrix(teenbirth2$AgeGroup) #grab response
+x<-model.matrix(AgeGroup~.,data=teenbirth2)[,-1] #grab predictors
+x<-scale(x)
+cv<-cv.glmnet(x,y)
+lasso<-glmnet(x,y,family="binomial",lambda=cv$lambda.1se)
+coef(lasso)
+
+class_diag(prob,teenbirth2$AgeGroup)
+set.seed(1234)
+k=10 #choose number of folds
+data<-teenbirth2[sample(nrow(teenbirth2)),] #randomly order rows
+folds<-cut(seq(1:nrow(teenbirth2)),breaks=k,labels=F) #create folds
+diags<-NULL
+for(i in 1:k){
+## Create training and test sets
+train<-data[folds!=i,]
+test<-data[folds==i,]
+truth<-test$AgeGroup ## Truth labels for fold i
+## Train model on training set (all but fold i)
+fit6<-glm(AgeGroup~.,data=train,family="binomial")
+## Test model on test set (fold i)
+probs<-predict(fit6,newdata = test,type="response")
+## Get diagnostics for fold i
+diags<-rbind(diags,class_diag(probs,truth))
+}
+summarize_all(diags,mean) #average diagnostics across all k folds
+```
+*I decided to remove a number of columns from my dataset because I kept getting strange error messages and I felt that those columns likely would not have a large impact on the LASSO as is. Based on the output, it appears that state birth rate and year are the most predictive variables. The results of my CV are the exact same as the logistic regression.*
+

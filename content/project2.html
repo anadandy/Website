@@ -1,0 +1,470 @@
+---
+title: "Project 2"
+output:
+  pdf_document: default
+  html_document: default
+---
+
+
+
+<div id="ana-dandy-amd5355" class="section level2">
+<h2>Ana Dandy amd5355</h2>
+<p><em>Introduction: For this project, I found a dataset which has information about teenage birth rates in the United States for every state from 1990-2018. The categorical variable initally had 3 subgroups, 15-17 y/o, 15-19 y/o, and 18-19 y/o; and for this project, I decided to omit the 15-19 y/o entries so that I could have a binary response and so that I can look at the information as two parts rather than a part and a whole. I also decided to omit all of the entries from all other states in the US other than Texas to both reduce the number of entries I was working with, and to make the data more relevant and interesting considering it is our home state. This dataset contains both the state birth rates and the US birth rates for the corresponding group and year, both measured by number of teen births per 1,000 births. The dataset also contained the number of births annually for each of the groups in both the state and the country. In the end, I was working with 58 observations which contained information for all of the variables.</em></p>
+<pre class="r"><code>library(dplyr)</code></pre>
+<pre><code>## 
+## Attaching package: &#39;dplyr&#39;</code></pre>
+<pre><code>## The following objects are masked from &#39;package:stats&#39;:
+## 
+##     filter, lag</code></pre>
+<pre><code>## The following objects are masked from &#39;package:base&#39;:
+## 
+##     intersect, setdiff, setequal, union</code></pre>
+<pre class="r"><code>library(tidyverse)</code></pre>
+<pre><code>## ── Attaching packages ─────────────────────────── tidyverse 1.3.0 ──</code></pre>
+<pre><code>## ✔ ggplot2 3.2.1          ✔ purrr   0.3.3     
+## ✔ tibble  2.1.3          ✔ stringr 1.4.0     
+## ✔ tidyr   1.0.0.9000     ✔ forcats 0.4.0     
+## ✔ readr   1.3.1</code></pre>
+<pre><code>## ── Conflicts ────────────────────────────── tidyverse_conflicts() ──
+## ✖ dplyr::filter() masks stats::filter()
+## ✖ dplyr::lag()    masks stats::lag()</code></pre>
+<pre class="r"><code>library(sandwich)
+library(lmtest)</code></pre>
+<pre><code>## Loading required package: zoo</code></pre>
+<pre><code>## 
+## Attaching package: &#39;zoo&#39;</code></pre>
+<pre><code>## The following objects are masked from &#39;package:base&#39;:
+## 
+##     as.Date, as.Date.numeric</code></pre>
+<pre class="r"><code>library(plotROC)
+library(pROC)</code></pre>
+<pre><code>## Type &#39;citation(&quot;pROC&quot;)&#39; for a citation.</code></pre>
+<pre><code>## 
+## Attaching package: &#39;pROC&#39;</code></pre>
+<pre><code>## The following object is masked from &#39;package:plotROC&#39;:
+## 
+##     ggroc</code></pre>
+<pre><code>## The following objects are masked from &#39;package:stats&#39;:
+## 
+##     cov, smooth, var</code></pre>
+<pre class="r"><code>library(glmnet)</code></pre>
+<pre><code>## Loading required package: Matrix</code></pre>
+<pre><code>## 
+## Attaching package: &#39;Matrix&#39;</code></pre>
+<pre><code>## The following objects are masked from &#39;package:tidyr&#39;:
+## 
+##     expand, pack, unpack</code></pre>
+<pre><code>## Loading required package: foreach</code></pre>
+<pre><code>## 
+## Attaching package: &#39;foreach&#39;</code></pre>
+<pre><code>## The following objects are masked from &#39;package:purrr&#39;:
+## 
+##     accumulate, when</code></pre>
+<pre><code>## Loaded glmnet 2.0-16</code></pre>
+<pre><code>## 
+## Attaching package: &#39;glmnet&#39;</code></pre>
+<pre><code>## The following object is masked from &#39;package:pROC&#39;:
+## 
+##     auc</code></pre>
+<pre class="r"><code>teenbirth&lt;-read.csv(&quot;NCHS.csv&quot;)
+teenbirth&lt;-teenbirth%&gt;%filter(State==&quot;Texas&quot;)%&gt;%filter(Age.Group..Years. !=&quot;15-19 years&quot;)
+head(teenbirth)</code></pre>
+<pre><code>##   Year State Age.Group..Years. State.Rate State.Births U.S..Births
+## 1 1990 Texas       15-17 years       48.0        17693      183327
+## 2 1991 Texas       15-17 years       50.0        18653      188226
+## 3 1992 Texas       15-17 years       50.5        19296      187549
+## 4 1993 Texas       15-17 years       50.8        19812      190535
+## 5 1994 Texas       15-17 years       51.2        20680      195169
+## 6 1995 Texas       15-17 years       49.9        21018      192508
+##   U.S..Birth.Rate      Unit
+## 1            37.5 per 1,000
+## 2            38.6 per 1,000
+## 3            37.6 per 1,000
+## 4            37.5 per 1,000
+## 5            37.2 per 1,000
+## 6            35.5 per 1,000</code></pre>
+<p><em>1. MANOVA</em></p>
+<pre class="r"><code>##MANOVA
+man1&lt;-manova(cbind(Year, State.Rate)~Age.Group..Years., data=teenbirth)
+summary(man1)</code></pre>
+<pre><code>##                   Df  Pillai approx F num Df den Df    Pr(&gt;F)    
+## Age.Group..Years.  1 0.94638   485.38      2     55 &lt; 2.2e-16 ***
+## Residuals         56                                             
+## ---
+## Signif. codes:  0 &#39;***&#39; 0.001 &#39;**&#39; 0.01 &#39;*&#39; 0.05 &#39;.&#39; 0.1 &#39; &#39; 1</code></pre>
+<pre class="r"><code>summary.aov(man1)</code></pre>
+<pre><code>##  Response Year :
+##                   Df Sum Sq Mean Sq F value Pr(&gt;F)
+## Age.Group..Years.  1      0     0.0       0      1
+## Residuals         56   4060    72.5               
+## 
+##  Response State.Rate :
+##                   Df Sum Sq Mean Sq F value    Pr(&gt;F)    
+## Age.Group..Years.  1  52947   52947  166.35 &lt; 2.2e-16 ***
+## Residuals         56  17824     318                      
+## ---
+## Signif. codes:  0 &#39;***&#39; 0.001 &#39;**&#39; 0.01 &#39;*&#39; 0.05 &#39;.&#39; 0.1 &#39; &#39; 1</code></pre>
+<pre class="r"><code>teenbirth%&gt;%group_by(Age.Group..Years.)%&gt;%summarize(mean(State.Rate),mean(Year))</code></pre>
+<pre><code>## # A tibble: 2 x 3
+##   Age.Group..Years. `mean(State.Rate)` `mean(Year)`
+##   &lt;fct&gt;                          &lt;dbl&gt;        &lt;dbl&gt;
+## 1 15-17 years                     35.2         2004
+## 2 18-19 years                     95.7         2004</code></pre>
+<pre class="r"><code>pairwise.t.test(teenbirth$State.Rate,teenbirth$Age.Group..Years.,p.adj=&quot;none&quot;)</code></pre>
+<pre><code>## 
+##  Pairwise comparisons using t tests with pooled SD 
+## 
+## data:  teenbirth$State.Rate and teenbirth$Age.Group..Years. 
+## 
+##             15-17 years
+## 18-19 years &lt;2e-16     
+## 
+## P value adjustment method: none</code></pre>
+<pre class="r"><code>1-.95^4</code></pre>
+<pre><code>## [1] 0.1854938</code></pre>
+<pre class="r"><code>0.05/4</code></pre>
+<pre><code>## [1] 0.0125</code></pre>
+<p><em>I ran a MANOVA test to determine the effect of the Age Group of teen births (15-17 or 18-19 years old) on two variables, year and the state rate per 1,000 births. The initial MANOVA showed a significant difference, however, when I ran the univariate ANOVAs, it showed that only the state rate was significant. For this reason, I only ran a post-hoc test on the state rate, which showed that there is a significant difference between the groups. The category is binary so the groups that differ are the 15-17 year olds and the 18-19 year olds. I performed a total of 4 tests, there is an 18.5494% chance that there is at least one type I error, and the bonferroni correction is 0.0125. Because this data is collected from all teenage births across the state and country, this dataset likely fails most of the assumptions. The data that I have selected is every year from 1990 to 2018 in the state of Texas so it is not random. The only assumption that could potentially be met is the linear relationships among DVs because when you look at the datatable, you can see that teen births have been decreasing statewide over the years. </em></p>
+<p><em>2. RANDOMIZATION</em></p>
+<pre class="r"><code>#randomization, age group and state birth rate
+youngerteen &lt;-c(48.0,50.0,50.5,50.8,51.2,49.9,47.9,46.2,44.2,42.8,41.6,38.9,38.3,37.0,36.6,35.4,35.3,35.4,35.0,32.8,29.3,25.6,23.4,21.1,18.8,16.7,15.1,12.9,11.4)
+olderteen&lt;-c(112.2,119.2,119.9,118.3,117.0,115.8,113.3,111.7,111.6,110.0,109.6,107.0,105.2,101.8,101.0,100.3,102.7,103.1,99.8,95.5,86.5,79.0,76.6,72.0,67.7,63.0,56.5,51.1,47.1)
+teens&lt;-data.frame(age=c(rep(&quot;youngerteen&quot;,29),rep(&quot;olderteen&quot;,29)),state.rate=c(youngerteen,olderteen))
+head(teens)</code></pre>
+<pre><code>##           age state.rate
+## 1 youngerteen       48.0
+## 2 youngerteen       50.0
+## 3 youngerteen       50.5
+## 4 youngerteen       50.8
+## 5 youngerteen       51.2
+## 6 youngerteen       49.9</code></pre>
+<pre class="r"><code>ggplot(teens,aes(state.rate,fill=age))+geom_histogram(bins=5)+facet_wrap(~age,ncol=2)+theme(legend.position=&quot;none&quot;)</code></pre>
+<p><img src="/project2_files/figure-html/unnamed-chunk-3-1.png" width="672" /></p>
+<pre class="r"><code>teens%&gt;%group_by(age)%&gt;%
+  summarize(means=mean(state.rate))%&gt;%summarize(`mean_diff:`=diff(means))</code></pre>
+<pre><code>## # A tibble: 1 x 1
+##   `mean_diff:`
+##          &lt;dbl&gt;
+## 1        -60.4</code></pre>
+<pre class="r"><code>head(perm1&lt;-data.frame(age=teens$age,state.rate=sample(teens$state.rate)))</code></pre>
+<pre><code>##           age state.rate
+## 1 youngerteen       23.4
+## 2 youngerteen       50.5
+## 3 youngerteen       16.7
+## 4 youngerteen       18.8
+## 5 youngerteen       95.5
+## 6 youngerteen       38.9</code></pre>
+<pre class="r"><code>perm1%&gt;%group_by(age)%&gt;%
+  summarize(means=mean(state.rate))%&gt;%summarize(`mean_diff:`=diff(means))</code></pre>
+<pre><code>## # A tibble: 1 x 1
+##   `mean_diff:`
+##          &lt;dbl&gt;
+## 1        -12.9</code></pre>
+<pre class="r"><code>rand_dist&lt;-vector()
+for(i in 1:5000){
+new&lt;-data.frame(state.rate=sample(teens$state.rate),age=teens$age)
+rand_dist[i]&lt;-mean(new[new$age==&quot;youngerteen&quot;,]$state.rate)-
+mean(new[new$age==&quot;olderteen&quot;,]$state.rate)}
+{hist(rand_dist,main=&quot;&quot;,ylab=&quot;&quot;); abline(v = -60.42759,col=&quot;red&quot;)}</code></pre>
+<p><img src="/project2_files/figure-html/unnamed-chunk-3-2.png" width="672" /></p>
+<pre class="r"><code>mean(rand_dist&gt;60.42759)*2</code></pre>
+<pre><code>## [1] 0</code></pre>
+<p><em>I performed a randomization test between the age group, either 15-17 y/o which I named “youngerteen” and 18-19 y/o which I named “olderteen”, and state birth rate per 1,000 births. The null hypothesis is: mean state birth rate is the same for younger and older teens and the alternative hypothesis is: mean state birth rate is different for younger and older teens. I calculated the mean difference to be -60.4276. I then randomized the data and created a histogram showing the results with a red line to be at -60.4276. As you can see, the red line does not appear on the graph because there are no mean differences which are as extreme as the computed mean difference value. This was confirmed by a t-test which showed that the p-value of this is 0, meaning we can reject the null hypothesis and say that there is a difference in mean birth rate between the two groups of teens.</em></p>
+<p><em>3. LINEAR REGRESSION</em></p>
+<pre class="r"><code>#linear regression
+teenbirth$State.Rate_c &lt;- teenbirth$State.Rate - mean(teenbirth$State.Rate)
+teenbirth$Year_c &lt;- teenbirth$Year - mean(teenbirth$Year)
+fit&lt;-lm(State.Rate_c~Year_c*Age.Group..Years., data= teenbirth)
+summary(fit)</code></pre>
+<pre><code>## 
+## Call:
+## lm(formula = State.Rate_c ~ Year_c * Age.Group..Years., data = teenbirth)
+## 
+## Residuals:
+##      Min       1Q   Median       3Q      Max 
+## -16.9621  -2.7636   0.2609   2.8437  14.6039 
+## 
+## Coefficients:
+##                                     Estimate Std. Error t value Pr(&gt;|t|)    
+## (Intercept)                         -30.2138     1.1467 -26.348  &lt; 2e-16 ***
+## Year_c                               -1.4295     0.1371 -10.430 1.51e-14 ***
+## Age.Group..Years.18-19 years         60.4276     1.6217  37.262  &lt; 2e-16 ***
+## Year_c:Age.Group..Years.18-19 years  -0.9626     0.1938  -4.966 7.22e-06 ***
+## ---
+## Signif. codes:  0 &#39;***&#39; 0.001 &#39;**&#39; 0.01 &#39;*&#39; 0.05 &#39;.&#39; 0.1 &#39; &#39; 1
+## 
+## Residual standard error: 6.175 on 54 degrees of freedom
+## Multiple R-squared:  0.9709, Adjusted R-squared:  0.9693 
+## F-statistic: 600.6 on 3 and 54 DF,  p-value: &lt; 2.2e-16</code></pre>
+<pre class="r"><code>t.test(data=teenbirth,State.Rate_c~Age.Group..Years.,var.eq=T)</code></pre>
+<pre><code>## 
+##  Two Sample t-test
+## 
+## data:  State.Rate_c by Age.Group..Years.
+## t = -12.898, df = 56, p-value &lt; 2.2e-16
+## alternative hypothesis: true difference in means is not equal to 0
+## 95 percent confidence interval:
+##  -69.81301 -51.04217
+## sample estimates:
+## mean in group 15-17 years mean in group 18-19 years 
+##                 -30.21379                  30.21379</code></pre>
+<pre class="r"><code>ggplot(teenbirth, aes(x=Year_c,y=State.Rate_c,group=Age.Group..Years.))+geom_point(aes(color=Age.Group..Years.))+geom_smooth(method=&quot;lm&quot;,formula = y~1,se=F,fullrange=T,aes(color=Age.Group..Years.))+theme(legend.position = c(.9,.91))+xlab(&quot;&quot;)</code></pre>
+<p><img src="/project2_files/figure-html/unnamed-chunk-4-1.png" width="672" /> <em>For the linear regression, I attempted to determine the state birth rate per 1,000 births based on the year and the age group which the teens fell into (either 15-17 y/o or 18-19 y/o, as well as their interaction. The coefficients show that annually, the state birth rate is decreasing for 15-17 y/o by -1.4295. It also shows that the 18-19 year old group has a birth rate 60.4276 points higher than the mean birth rate for the 15-17 y/o group. Lastly, the slope for year on state rate is 0.9626 lower for 18-19 y/o compared to 15-17 y/o. All of the coefficients are significant.</em></p>
+<pre class="r"><code>new1&lt;-teenbirth
+new1$Year_c&lt;-mean(teenbirth$Year_c)
+new1$mean&lt;-predict(fit,new1)
+new1$Year_c&lt;-mean(teenbirth$Year_c)+sd(teenbirth$Year_c)
+new1$plus.sd&lt;-predict(fit,new1)
+new1$Year_c&lt;-mean(teenbirth$Year_c)-sd(teenbirth$Year_c)
+new1$minus.sd&lt;-predict(fit,new1)
+
+mycols&lt;-c(&quot;#619CFF&quot;,&quot;#F8766D&quot;,&quot;#00BA38&quot;)
+names(mycols)&lt;-c(&quot;-1 sd&quot;,&quot;mean&quot;,&quot;+1 sd&quot;)
+mycols=as.factor(mycols)
+
+ggplot(teenbirth,aes(State.Rate_c,Year_c),group=mycols)+geom_point()+geom_line(data=new1,aes(y=mean,color=&quot;mean&quot;))+geom_line(data=new1,aes(y=plus.sd,color=&quot;+1 sd&quot;))+geom_line(data=new1,aes(y=minus.sd,color=&quot;-1 sd&quot;))+scale_color_manual(values=mycols)+labs(color=&quot;Age Group (cont)&quot;)+theme(legend.position=c(.9,.2)) #Interaction Plot</code></pre>
+<p><img src="/project2_files/figure-html/unnamed-chunk-5-1.png" width="672" /> <em>When I plotted the interaction, I unfortunately got a very hideous plot as the result. I believe that the reasoning behind this is that every year, there were only 2 state birth rates recorded; one for the 15-17 y/o and another for the 18-19 y/o group. The 18-19 y/o group always had a much higher birth rate, so the point in the graph where it spikes, is the location where the birth rates for the 15-16 y/o group were similar to that of the 18-19 y/o group.</em></p>
+<pre class="r"><code>resids&lt;-lm(State.Rate_c~Year_c*Age.Group..Years., data= teenbirth)$residuals
+fitted&lt;-lm(State.Rate_c~Year_c*Age.Group..Years., data= teenbirth)$fitted.values
+resids&lt;-fit$residuals
+fitvals&lt;-fit$fitted.values
+ggplot()+geom_point(aes(fitvals,resids))+geom_hline(yintercept=0, color=&#39;red&#39;) #Plot to check for homoskedasticity and linearity</code></pre>
+<p><img src="/project2_files/figure-html/unnamed-chunk-6-1.png" width="672" /> <em>This plot is to check for homoskedasticity and linearity. The plot is not linear and exhibits heteroskedasticity.</em></p>
+<pre class="r"><code>ggplot()+geom_histogram(aes(resids), bins=20) #Plot to check for normality</code></pre>
+<p><img src="/project2_files/figure-html/unnamed-chunk-7-1.png" width="672" /></p>
+<pre class="r"><code>ggplot()+geom_qq(aes(sample=resids))+geom_qq_line(aes(sample=resids)) #Plot to check for normality</code></pre>
+<p><img src="/project2_files/figure-html/unnamed-chunk-7-2.png" width="672" /></p>
+<pre class="r"><code>cdf1&lt;-ecdf(resids)
+x0&lt;-resids[(which.max(abs(cdf1(resids)-pnorm(resids,sd=sd(resids)))))]
+y0&lt;-cdf1(x0)
+y1&lt;-pnorm(x0,sd=sd(resids))
+
+ggplot()+stat_ecdf(aes(x=resids),color=&quot;blue&quot;)+
+  stat_function(aes(x=resids),geom = &quot;line&quot;,fun=pnorm, args=list(sd=sd(resids)))+
+  geom_segment(aes(x=x0,y=y0,xend=x0,yend=y1),color=&quot;red&quot;) #Plot to check for normality</code></pre>
+<p><img src="/project2_files/figure-html/unnamed-chunk-7-3.png" width="672" /> <em>These plots show that the data generally follows normality; the histogram is mostly normally shaped, the qq-plot shows that most of the points fall along the line, and the normality curve only has one area that strays more than the rest of the plot off of the line.</em></p>
+<pre class="r"><code>fit2&lt;-lm(State.Rate_c~Year_c*Age.Group..Years., data= teenbirth)
+bptest(fit2) #rejects null</code></pre>
+<pre><code>## 
+##  studentized Breusch-Pagan test
+## 
+## data:  fit2
+## BP = 13.169, df = 3, p-value = 0.004286</code></pre>
+<pre class="r"><code>summary(fit2)$coef[,1:2]</code></pre>
+<pre><code>##                                        Estimate Std. Error
+## (Intercept)                         -30.2137931  1.1467250
+## Year_c                               -1.4295074  0.1370599
+## Age.Group..Years.18-19 years         60.4275862  1.6217141
+## Year_c:Age.Group..Years.18-19 years  -0.9626108  0.1938319</code></pre>
+<pre class="r"><code>coeftest(fit2, vcov = vcovHC(fit2))[,1:2]</code></pre>
+<pre><code>##                                        Estimate Std. Error
+## (Intercept)                         -30.2137931  0.5670271
+## Year_c                               -1.4295074  0.0858189
+## Age.Group..Years.18-19 years         60.4275862  1.7120934
+## Year_c:Age.Group..Years.18-19 years  -0.9626108  0.2524220</code></pre>
+<p><em>The results of the BP test show that the p-value is less than 0.05 so you can therefore reject the null hypothesis and conclude that the data is heteroskedastic. After the robust standard error was conducted, the standard error for the intercept and year decreased, while the standard error for the 18-19 y/o group and the interaction increased.</em></p>
+<pre class="r"><code>(sum((teenbirth$State.Rate_c-mean(teenbirth$State.Rate_c))^2)-sum(fit$residuals^2))/sum((teenbirth$State.Rate_c-mean(teenbirth$State.Rate_c))^2)</code></pre>
+<pre><code>## [1] 0.9709023</code></pre>
+<p><em>My model explains 97.09% of the variation in the outcome.</em></p>
+<p><em>4. BOOTSTRAPPING</em></p>
+<pre class="r"><code>#regression with bootstrap
+boot_dat&lt;- sample_frac(teenbirth, replace=T)
+samp_distn&lt;-replicate(5000, {
+boot_dat &lt;- sample_frac(teenbirth, replace=T)
+fit3 &lt;- lm(State.Rate_c~Year_c*Age.Group..Years., data=boot_dat)
+coef(fit3)
+})
+samp_distn %&gt;% t %&gt;% as.data.frame %&gt;% summarize_all(sd)</code></pre>
+<pre><code>##   (Intercept)     Year_c Age.Group..Years.18-19 years
+## 1   0.5324471 0.08072641                     1.666601
+##   Year_c:Age.Group..Years.18-19 years
+## 1                           0.2408659</code></pre>
+<p><em>The bootstrapped SEs are: 0.5429 for the intercept, 0.08045 for the year, 1.6505 for the 18-19 y/o age group, and 0.2422 for the interaction. These numbers are all very similar to those computed in the robust SEs, but they are all slightly lower. Because these numbers are so similar, it is likely that the bootstrapped SEs will still have a p-value less than 0.05. These values differ more from the original SEs computed for this model. The values for the original SEs are as follows: 1.1467 for the intercept, 0.1371 for the year, 1.6217 for the 18-19 y/o group, and 0.1938 for the interaction.</em></p>
+<p><em>5. LOGISTIC REGRESSION</em></p>
+<pre class="r"><code>#logistic regression
+teenbirth&lt;-teenbirth%&gt;%mutate(AgeGroup=ifelse(Age.Group..Years.==&quot;15-17 years&quot;,0,1))
+head(data)</code></pre>
+<pre><code>##                                                                      
+## 1 function (..., list = character(), package = NULL, lib.loc = NULL, 
+## 2     verbose = getOption(&quot;verbose&quot;), envir = .GlobalEnv)            
+## 3 {                                                                  
+## 4     fileExt &lt;- function(x) {                                       
+## 5         db &lt;- grepl(&quot;\\\\.[^.]+\\\\.(gz|bz2|xz)$&quot;, x)              
+## 6         ans &lt;- sub(&quot;.*\\\\.&quot;, &quot;&quot;, x)</code></pre>
+<pre class="r"><code>fit4&lt;-glm(AgeGroup~Year+State.Rate,data=teenbirth,family = &quot;binomial&quot;)</code></pre>
+<pre><code>## Warning: glm.fit: algorithm did not converge</code></pre>
+<pre><code>## Warning: glm.fit: fitted probabilities numerically 0 or 1 occurred</code></pre>
+<pre class="r"><code>coeftest(fit4)</code></pre>
+<pre><code>## 
+## z test of coefficients:
+## 
+##                Estimate  Std. Error z value Pr(&gt;|z|)
+## (Intercept) -6.1539e+03  1.0345e+07  -6e-04   0.9995
+## Year         3.0299e+00  5.1145e+03   6e-04   0.9995
+## State.Rate   1.3193e+00  1.6933e+03   8e-04   0.9994</code></pre>
+<pre class="r"><code>exp(coef(fit4))</code></pre>
+<pre><code>## (Intercept)        Year  State.Rate 
+##     0.00000    20.69579     3.74085</code></pre>
+<p><em>The coefficient estimates for my regression are: -6.1539e+03 for the intercept, 3.0299 for the year, and 1.3193 for the state birth rate and none of them are significant. This means that you fail to reject the null hypothesis and there is not a significant relationship between the age group and year or age group and state rate.</em></p>
+<pre class="r"><code>prob&lt;-predict(fit4,type=&quot;response&quot;)
+pred&lt;-ifelse(prob&gt;.5,1,0)
+table(prediction=pred,truth=teenbirth$AgeGroup)%&gt;%addmargins()</code></pre>
+<pre><code>##           truth
+## prediction  0  1 Sum
+##        0   29  0  29
+##        1    0 29  29
+##        Sum 29 29  58</code></pre>
+<pre class="r"><code>(29+29)/58 #accuracy</code></pre>
+<pre><code>## [1] 1</code></pre>
+<pre class="r"><code>29/29 #tpr (sensitivity)</code></pre>
+<pre><code>## [1] 1</code></pre>
+<pre class="r"><code>29/29 #tnr (specificity)</code></pre>
+<pre><code>## [1] 1</code></pre>
+<pre class="r"><code>29/29 #ppv (precision)</code></pre>
+<pre><code>## [1] 1</code></pre>
+<p><em>The accuracy, TPR, TNR, and PPV for my model are all equal to 1. This means that the model will always accurately calculate the true positive rate and the true negative rate. The precision also means that, given the year and state birth rate, they will always be categorized correcting into either 15-17 y/o or 18-19 y/o.</em></p>
+<pre class="r"><code>teenbirth$logit&lt;-predict(fit4,type=&quot;link&quot;)
+ggplot(teenbirth,aes(logit, fill=as.factor(AgeGroup)))+geom_density(alpha=.3)+
+  theme(legend.position=c(.63,.85))+geom_vline(xintercept=0)+xlab(&quot;predictor (logit)&quot;)</code></pre>
+<p><img src="/project2_files/figure-html/unnamed-chunk-13-1.png" width="672" /> <em>This data created a very nice density plot that has no overlap between the two age groups, meaning that the model is doing a good job. Every person/group who is measured to be 15-17 or 18-19 is always correctly categorized.</em></p>
+<pre class="r"><code>ROCplot&lt;-ggplot(teenbirth)+geom_roc(aes(d=AgeGroup,m=prob), n.cuts=0) 
+ROCplot</code></pre>
+<p><img src="/project2_files/figure-html/unnamed-chunk-14-1.png" width="672" /></p>
+<pre class="r"><code>calc_auc(ROCplot)</code></pre>
+<pre><code>##   PANEL group AUC
+## 1     1    -1   1</code></pre>
+<p><em>The ROC plot generated a perfect right angle, which is what was expected to happen due to the nature of the confusion matrix. The AUC was 1, which is expected based on the graph. This means that the model is perfectly calculating the TPR result. Every person/group that is measured to be 15-17 or 18-19 is always correctly categorized.</em></p>
+<pre class="r"><code>class_diag &lt;- function(probs,truth){
+#CONFUSION MATRIX: CALCULATE ACCURACY, TPR, TNR, PPV
+tab&lt;-table(factor(probs&gt;.5,levels=c(&quot;FALSE&quot;,&quot;TRUE&quot;)),truth)
+acc=sum(diag(tab))/sum(tab)
+sens=tab[2,2]/colSums(tab)[2]
+spec=tab[1,1]/colSums(tab)[1]
+ppv=tab[2,2]/rowSums(tab)[2]
+if(is.numeric(truth)==FALSE &amp; is.logical(truth)==FALSE) truth&lt;-as.numeric(truth)-1
+#CALCULATE EXACT AUC
+ord&lt;-order(probs, decreasing=TRUE)
+probs &lt;- probs[ord]; truth &lt;- truth[ord]
+TPR=cumsum(truth)/max(1,sum(truth))
+FPR=cumsum(!truth)/max(1,sum(!truth))
+dup&lt;-c(probs[-1]&gt;=probs[-length(probs)], FALSE)
+TPR&lt;-c(0,TPR[!dup],1); FPR&lt;-c(0,FPR[!dup],1)
+n &lt;- length(TPR)
+auc&lt;- sum( ((TPR[-1]+TPR[-n])/2) * (FPR[-1]-FPR[-n]) )
+data.frame(acc,sens,spec,ppv,auc)
+} 
+
+class_diag(prob,teenbirth$AgeGroup)</code></pre>
+<pre><code>##   acc sens spec ppv auc
+## 1   1    1    1   1   1</code></pre>
+<pre class="r"><code>set.seed(1234)
+k=10 #choose number of folds
+data&lt;-teenbirth[sample(nrow(teenbirth)),] #randomly order rows
+folds&lt;-cut(seq(1:nrow(teenbirth)),breaks=k,labels=F) #create folds
+diags&lt;-NULL
+for(i in 1:k){
+## Create training and test sets
+train&lt;-data[folds!=i,]
+test&lt;-data[folds==i,]
+truth&lt;-test$AgeGroup ## Truth labels for fold i
+## Train model on training set (all but fold i)
+fit5&lt;-glm(AgeGroup~Year+State.Rate,data=train,family=&quot;binomial&quot;)
+## Test model on test set (fold i)
+probs&lt;-predict(fit5,newdata = test,type=&quot;response&quot;)
+## Get diagnostics for fold i
+diags&lt;-rbind(diags,class_diag(probs,truth))
+}</code></pre>
+<pre><code>## Warning: glm.fit: algorithm did not converge</code></pre>
+<pre><code>## Warning: glm.fit: fitted probabilities numerically 0 or 1 occurred</code></pre>
+<pre><code>## Warning: glm.fit: algorithm did not converge</code></pre>
+<pre><code>## Warning: glm.fit: fitted probabilities numerically 0 or 1 occurred</code></pre>
+<pre><code>## Warning: glm.fit: algorithm did not converge</code></pre>
+<pre><code>## Warning: glm.fit: fitted probabilities numerically 0 or 1 occurred</code></pre>
+<pre><code>## Warning: glm.fit: algorithm did not converge</code></pre>
+<pre><code>## Warning: glm.fit: fitted probabilities numerically 0 or 1 occurred</code></pre>
+<pre><code>## Warning: glm.fit: algorithm did not converge</code></pre>
+<pre><code>## Warning: glm.fit: fitted probabilities numerically 0 or 1 occurred</code></pre>
+<pre><code>## Warning: glm.fit: algorithm did not converge</code></pre>
+<pre><code>## Warning: glm.fit: fitted probabilities numerically 0 or 1 occurred</code></pre>
+<pre><code>## Warning: glm.fit: algorithm did not converge</code></pre>
+<pre><code>## Warning: glm.fit: fitted probabilities numerically 0 or 1 occurred</code></pre>
+<pre><code>## Warning: glm.fit: algorithm did not converge</code></pre>
+<pre><code>## Warning: glm.fit: fitted probabilities numerically 0 or 1 occurred</code></pre>
+<pre><code>## Warning: glm.fit: algorithm did not converge</code></pre>
+<pre><code>## Warning: glm.fit: fitted probabilities numerically 0 or 1 occurred</code></pre>
+<pre><code>## Warning: glm.fit: algorithm did not converge</code></pre>
+<pre><code>## Warning: glm.fit: fitted probabilities numerically 0 or 1 occurred</code></pre>
+<pre class="r"><code>summarize_all(diags,mean) #average diagnostics across all k folds</code></pre>
+<pre><code>##   acc sens spec ppv auc
+## 1   1    1    1   1   1</code></pre>
+<p><em>The 10-fold CV once again gave an output of 1 for accuracy, sensitivity and recall.</em></p>
+<p><em>6. LASSO</em></p>
+<pre class="r"><code>teenbirth2&lt;-read.csv(&quot;NCHS.csv&quot;)
+teenbirth2&lt;-teenbirth%&gt;%filter(State==&quot;Texas&quot;)%&gt;%filter(Age.Group..Years. !=&quot;15-19 years&quot;)%&gt;%select(-c(Unit,State,State.Rate_c,Year_c,logit,Age.Group..Years.))
+head(teenbirth2)</code></pre>
+<pre><code>##   Year State.Rate State.Births U.S..Births U.S..Birth.Rate AgeGroup
+## 1 1990       48.0        17693      183327            37.5        0
+## 2 1991       50.0        18653      188226            38.6        0
+## 3 1992       50.5        19296      187549            37.6        0
+## 4 1993       50.8        19812      190535            37.5        0
+## 5 1994       51.2        20680      195169            37.2        0
+## 6 1995       49.9        21018      192508            35.5        0</code></pre>
+<pre class="r"><code>y&lt;-as.matrix(teenbirth2$AgeGroup) #grab response
+x&lt;-model.matrix(AgeGroup~.,data=teenbirth2)[,-1] #grab predictors
+x&lt;-scale(x)
+cv&lt;-cv.glmnet(x,y)
+lasso&lt;-glmnet(x,y,family=&quot;binomial&quot;,lambda=cv$lambda.1se)
+coef(lasso)</code></pre>
+<pre><code>## 6 x 1 sparse Matrix of class &quot;dgCMatrix&quot;
+##                        s0
+## (Intercept)     0.2980519
+## Year            1.1894879
+## State.Rate      3.4542586
+## State.Births    .        
+## U.S..Births     .        
+## U.S..Birth.Rate .</code></pre>
+<pre class="r"><code>class_diag(prob,teenbirth2$AgeGroup)</code></pre>
+<pre><code>##   acc sens spec ppv auc
+## 1   1    1    1   1   1</code></pre>
+<pre class="r"><code>set.seed(1234)
+k=10 #choose number of folds
+data&lt;-teenbirth2[sample(nrow(teenbirth2)),] #randomly order rows
+folds&lt;-cut(seq(1:nrow(teenbirth2)),breaks=k,labels=F) #create folds
+diags&lt;-NULL
+for(i in 1:k){
+## Create training and test sets
+train&lt;-data[folds!=i,]
+test&lt;-data[folds==i,]
+truth&lt;-test$AgeGroup ## Truth labels for fold i
+## Train model on training set (all but fold i)
+fit6&lt;-glm(AgeGroup~.,data=train,family=&quot;binomial&quot;)
+## Test model on test set (fold i)
+probs&lt;-predict(fit6,newdata = test,type=&quot;response&quot;)
+## Get diagnostics for fold i
+diags&lt;-rbind(diags,class_diag(probs,truth))
+}</code></pre>
+<pre><code>## Warning: glm.fit: algorithm did not converge</code></pre>
+<pre><code>## Warning: glm.fit: fitted probabilities numerically 0 or 1 occurred</code></pre>
+<pre><code>## Warning: glm.fit: algorithm did not converge</code></pre>
+<pre><code>## Warning: glm.fit: fitted probabilities numerically 0 or 1 occurred
+
+## Warning: glm.fit: fitted probabilities numerically 0 or 1 occurred</code></pre>
+<pre><code>## Warning: glm.fit: algorithm did not converge</code></pre>
+<pre><code>## Warning: glm.fit: fitted probabilities numerically 0 or 1 occurred
+
+## Warning: glm.fit: fitted probabilities numerically 0 or 1 occurred</code></pre>
+<pre><code>## Warning: glm.fit: algorithm did not converge</code></pre>
+<pre><code>## Warning: glm.fit: fitted probabilities numerically 0 or 1 occurred</code></pre>
+<pre><code>## Warning: glm.fit: algorithm did not converge</code></pre>
+<pre><code>## Warning: glm.fit: fitted probabilities numerically 0 or 1 occurred</code></pre>
+<pre><code>## Warning: glm.fit: algorithm did not converge</code></pre>
+<pre><code>## Warning: glm.fit: fitted probabilities numerically 0 or 1 occurred</code></pre>
+<pre><code>## Warning: glm.fit: algorithm did not converge</code></pre>
+<pre><code>## Warning: glm.fit: fitted probabilities numerically 0 or 1 occurred
+
+## Warning: glm.fit: fitted probabilities numerically 0 or 1 occurred</code></pre>
+<pre class="r"><code>summarize_all(diags,mean) #average diagnostics across all k folds</code></pre>
+<pre><code>##   acc sens spec ppv auc
+## 1   1    1    1   1   1</code></pre>
+<p><em>I decided to remove a number of columns from my dataset because I kept getting strange error messages and I felt that those columns likely would not have a large impact on the LASSO as is. Based on the output, it appears that state birth rate and year are the most predictive variables. The results of my CV are the exact same as the logistic regression.</em></p>
+</div>
