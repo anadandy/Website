@@ -9,3 +9,197 @@ git commit -m "first website commit"
 git remote add origin https://github.com/USERNAME/WEBSITE_REPOSITORY.git #re
 git push origin masterInitialized empty Git repository in /stor/home/amd5355/Website/.git/
 ]0;/stor/home/amd5355/Website]0;amd5355@educcomp01: ~/Website[01;32mamd5355@educcomp01[00m:[01;34m~/Website[00m$ git add . #add all files in repositoryy to be uploaded
+]0;/stor/home/amd5355/Website]0;amd5355@educcomp01: ~/Website[01;32mamd5355@educcomp01[00m:[01;34m~/Website[00m$ git commit -m "first website commit"
+[master (root-commit) 462f687] first website commit
+ Committer: Ana Dandy <amd5355@educcomp01.ccbb.utexas.edu>
+Your name and email address were configured automatically based
+on your username and hostname. Please check that they are accurate.
+You can suppress this message by setting them explicitly. Run the
+following command and follow the instructions in your editor to edit
+your configuration file:
+
+    git config --global --edit
+
+After doing this, you may fix the identity used for this commit with:
+
+    git commit --amend --reset-author
+
+ 168 files changed, 214504 insertions(+)
+ create mode 100644 .Rproj.user/EE177046/console06/AEB98938
+ create mode 100644 .Rproj.user/EE177046/console06/AEB98938.env
+ create mode 100644 .Rproj.user/EE177046/console06/INDEX001
+ create mode 100644 .Rproj.user/EE177046/sources/prop/22E98A03
+ create mode 100644 .Rproj.user/EE177046/sources/prop/3813880C
+ create mode 100644 .Rproj.user/EE177046/sources/prop/6C5BA8F9
+ create mode 100644 .Rproj.user/EE177046/sources/prop/AC3C1B29
+ create mode 100644 .Rproj.user/EE177046/sources/prop/BCA7BC8B
+ create mode 100644 .Rproj.user/EE177046/sources/prop/CE5E5068
+ create mode 100644 .Rproj.user/EE177046/sources/prop/INDEX
+ create mode 100644 .Rproj.user/EE177046/sources/s-4a1472df/1370CBCA-contents
+ create mode 100644 .Rproj.user/EE177046/sources/s-4a1472df/2F9EEC38
+ create mode 100644 .Rproj.user/EE177046/sources/s-4a1472df/2F9EEC38-contents
+ create mode 100644 .Rproj.user/EE177046/sources/s-4a1472df/6B97AB02
+ create mode 100644 .Rproj.user/EE177046/sources/s-4a1472df/6B97AB02-contents
+ create mode 100644 .Rproj.user/EE177046/sources/s-4a1472df/71DBCF29
+ create mode 100644 .Rproj.user/EE177046/sources/s-4a1472df/71DBCF29-contents
+ create mode 100644 .Rproj.user/EE177046/sources/s-4a1472df/85584CE5
+ create mode 100644 .Rproj.user/EE177046/sources/s-4a1472df/85584CE5-contents
+ create mode 100644 .Rproj.user/EE177046/sources/s-4a1472df/85AE13DF
+ create mode 100644 .Rproj.user/EE177046/sources/s-4a1472df/85AE13DF-contents
+ create mode 100644 .Rproj.user/EE177046/sources/s-4a1472df/90E0AD09
+ create mode 100644 .Rproj.user/EE177046/sources/s-4a1472df/90E0AD09-contents
+ create mode 100644 .Rproj.user/EE177046/sources/s-4a1472df/lock_file
+ create mode 100644 .Rproj.user/shared/notebooks/patch-chunk-names
+ create mode 100644 .Rproj.user/shared/notebooks/paths
+ create mode 100644 Website.Rproj
+ create mode 100644 config.toml
+ create mode 100644 content/NCHS.csv
+ create mode 100644 content/act_district_data_class_2017.csv
+ create mode 100644 content/blog/2015-07-23-r-rmarkdown.Rmd
+ create mode 100644 content/blog/2015-07-23-r-rmarkdown.html
+ create mode 100644 content/blog/creating-a-new-theme.md
+ create mode 100644 content/blog/goisforlovers.md
+ create mode 100644 content/blog/hugoisforlovers.md
+ create mode 100644 content/blog/migrate-from-jekyll.md
+ create mode 100644 content/project1.Rmd
+ create mode 100644 content/project1.html
+ create mode 100644 content/project2.Rmd
+ create mode 100644 content/project2.html
+ create mode 100644 content/projects.md
+ create mode 100644 content/sat_district_data_class_2017.csv
+ create mode 100644 index.Rmd
+ create mode 100644 public/404.html
+ create mode 100644 public/NCHS.csv
+ create mode 100644 public/act_district_data_class_2017.csv
+ create mode 100644 public/blog/2015-07-23-r-rmarkdown.Rmd
+ create mode 100644 public/blog/2015-07-23-r-rmarkdown/index.html
+ create mode 100644 public/blog/2015-07-23-r-rmarkdown_files/figure-html/pie-1.png
+ create mode 100644 public/blog/creating-a-new-theme/index.html
+ create mode 100644 public/blog/goisforlovers/index.html
+ create mode 100644 public/blog/hugoisforlovers/index.html
+ create mode 100644 public/blog/index.html
+ create mode 100644 public/blog/index.xml
+ create mode 100644 public/blog/migrate-from-jekyll/index.html
+ create mode 100644 public/categories/development/index.html
+ create mode 100644 public/categories/development/index.xml
+ create mode 100644 public/categories/golang/index.html
+ create mode 100644 public/categories/golang/index.xml
+ create mode 100644 public/categories/index.html
+ create mode 100644 public/categories/index.xml
+ create mode 100644 public/categories/projects/index.html
+ create mode 100644 public/categories/projects/index.xml
+ create mode 100644 public/categories/r/index.html
+ create mode 100644 public/categories/r/index.xml
+ create mode 100644 public/css/main.css
+ create mode 100644 public/img/profile.png
+ create mode 100644 public/img/profilepic.jpeg
+ create mode 100644 public/index.html
+ create mode 100644 public/index.xml
+ create mode 100644 public/js/docs.min.js
+ create mode 100644 public/js/ie10-viewport-bug-workaround.js
+ create mode 100644 public/js/main.js
+ create mode 100644 public/project1.Rmd
+ create mode 100644 public/project1/index.html
+ create mode 100644 public/project1_files/figure-html/unnamed-chunk-5-1.png
+ create mode 100644 public/project1_files/figure-html/unnamed-chunk-5-2.png
+ create mode 100644 public/project1_files/figure-html/unnamed-chunk-5-3.png
+ create mode 100644 public/project1_files/figure-html/unnamed-chunk-6-1.png
+ create mode 100644 public/project1_files/figure-html/unnamed-chunk-6-2.png
+ create mode 100644 public/project1_files/figure-html/unnamed-chunk-6-3.png
+ create mode 100644 public/project2.Rmd
+ create mode 100644 public/project2/index.html
+ create mode 100644 public/project2_files/figure-html/unnamed-chunk-13-1.png
+ create mode 100644 public/project2_files/figure-html/unnamed-chunk-14-1.png
+ create mode 100644 public/project2_files/figure-html/unnamed-chunk-3-1.png
+ create mode 100644 public/project2_files/figure-html/unnamed-chunk-3-2.png
+ create mode 100644 public/project2_files/figure-html/unnamed-chunk-4-1.png
+ create mode 100644 public/project2_files/figure-html/unnamed-chunk-5-1.png
+ create mode 100644 public/project2_files/figure-html/unnamed-chunk-6-1.png
+ create mode 100644 public/project2_files/figure-html/unnamed-chunk-7-1.png
+ create mode 100644 public/project2_files/figure-html/unnamed-chunk-7-2.png
+ create mode 100644 public/project2_files/figure-html/unnamed-chunk-7-3.png
+ create mode 100644 public/projects/index.html
+ create mode 100644 public/resume.pdf
+ create mode 100644 public/sat_district_data_class_2017.csv
+ create mode 100644 public/sitemap.xml
+ create mode 100644 public/tags/development/index.html
+ create mode 100644 public/tags/development/index.xml
+ create mode 100644 public/tags/go/index.html
+ create mode 100644 public/tags/go/index.xml
+ create mode 100644 public/tags/golang/index.html
+ create mode 100644 public/tags/golang/index.xml
+ create mode 100644 public/tags/hugo/index.html
+ create mode 100644 public/tags/hugo/index.xml
+ create mode 100644 public/tags/index.html
+ create mode 100644 public/tags/index.xml
+ create mode 100644 public/tags/plot/index.html
+ create mode 100644 public/tags/plot/index.xml
+ create mode 100644 public/tags/projects/index.html
+ create mode 100644 public/tags/projects/index.xml
+ create mode 100644 public/tags/r-markdown/index.html
+ create mode 100644 public/tags/r-markdown/index.xml
+ create mode 100644 public/tags/regression/index.html
+ create mode 100644 public/tags/regression/index.xml
+ create mode 100644 public/tags/templates/index.html
+ create mode 100644 public/tags/templates/index.xml
+ create mode 100644 public/tags/themes/index.html
+ create mode 100644 public/tags/themes/index.xml
+ create mode 100644 static/blog/2015-07-23-r-rmarkdown_files/figure-html/pie-1.png
+ create mode 100644 static/img/profile.png
+ create mode 100644 static/img/profilepic.jpeg
+ create mode 100644 static/project1_files/figure-html/unnamed-chunk-5-1.png
+ create mode 100644 static/project1_files/figure-html/unnamed-chunk-5-2.png
+ create mode 100644 static/project1_files/figure-html/unnamed-chunk-5-3.png
+ create mode 100644 static/project1_files/figure-html/unnamed-chunk-6-1.png
+ create mode 100644 static/project1_files/figure-html/unnamed-chunk-6-2.png
+ create mode 100644 static/project1_files/figure-html/unnamed-chunk-6-3.png
+ create mode 100644 static/project2_files/figure-html/unnamed-chunk-13-1.png
+ create mode 100644 static/project2_files/figure-html/unnamed-chunk-14-1.png
+ create mode 100644 static/project2_files/figure-html/unnamed-chunk-3-1.png
+ create mode 100644 static/project2_files/figure-html/unnamed-chunk-3-2.png
+ create mode 100644 static/project2_files/figure-html/unnamed-chunk-4-1.png
+ create mode 100644 static/project2_files/figure-html/unnamed-chunk-5-1.png
+ create mode 100644 static/project2_files/figure-html/unnamed-chunk-6-1.png
+ create mode 100644 static/project2_files/figure-html/unnamed-chunk-7-1.png
+ create mode 100644 static/project2_files/figure-html/unnamed-chunk-7-2.png
+ create mode 100644 static/project2_files/figure-html/unnamed-chunk-7-3.png
+ create mode 100644 static/resume.pdf
+ create mode 100644 themes/hugo-sustain/LICENSE.md
+ create mode 100644 themes/hugo-sustain/README.md
+ create mode 100644 themes/hugo-sustain/archetypes/default.md
+ create mode 100644 themes/hugo-sustain/exampleSite/config.toml
+ create mode 100644 themes/hugo-sustain/exampleSite/content/blog/creating-a-new-theme.md
+ create mode 100644 themes/hugo-sustain/exampleSite/content/blog/goisforlovers.md
+ create mode 100644 themes/hugo-sustain/exampleSite/content/blog/hugoisforlovers.md
+ create mode 100644 themes/hugo-sustain/exampleSite/content/blog/migrate-from-jekyll.md
+ create mode 100644 themes/hugo-sustain/exampleSite/content/projects.md
+ create mode 100644 themes/hugo-sustain/exampleSite/data/projects.yml
+ create mode 100644 themes/hugo-sustain/exampleSite/static/img/profile.png
+ create mode 100644 themes/hugo-sustain/images/screenshot.png
+ create mode 100644 themes/hugo-sustain/images/tn.png
+ create mode 100644 themes/hugo-sustain/layouts/404.html
+ create mode 100644 themes/hugo-sustain/layouts/_default/list.html
+ create mode 100644 themes/hugo-sustain/layouts/_default/projects.html
+ create mode 100644 themes/hugo-sustain/layouts/_default/single.html
+ create mode 100644 themes/hugo-sustain/layouts/index.html
+ create mode 100644 themes/hugo-sustain/layouts/partials/disqus.html
+ create mode 100644 themes/hugo-sustain/layouts/partials/footer.html
+ create mode 100644 themes/hugo-sustain/layouts/partials/head.html
+ create mode 100644 themes/hugo-sustain/layouts/partials/header.html
+ create mode 100644 themes/hugo-sustain/layouts/partials/js.html
+ create mode 100644 themes/hugo-sustain/layouts/partials/social.html
+ create mode 100644 themes/hugo-sustain/static/css/main.css
+ create mode 100644 themes/hugo-sustain/static/js/docs.min.js
+ create mode 100644 themes/hugo-sustain/static/js/ie10-viewport-bug-workaround.js
+ create mode 100644 themes/hugo-sustain/static/js/main.js
+ create mode 100644 themes/hugo-sustain/theme.toml
+]0;/stor/home/amd5355/Website]0;amd5355@educcomp01: ~/Website[01;32mamd5355@educcomp01[00m:[01;34m~/Website[00m$ git remote add origin https://github.ccom/USERNAME/WEBSITE_REPOSITORY.git #re
+]0;/stor/home/amd5355/Website]0;amd5355@educcomp01: ~/Website[01;32mamd5355@educcomp01[00m:[01;34m~/Website[00m$ git push origin master[K[K[K[K[K[K[K[K[K[K[K[K[K[K[K[K[K[K[K[K[K[Kcd ~/Desktop/Website #if you haven't aalready
+to be uploaded
+git commit -m "first website commit"
+git remote add origin https://github.com/anadandy/Website.git #re
+git push origin masterbash: cd: /stor/home/amd5355/Desktop/Website: No such file or directory
+]0;/stor/home/amd5355/Website]0;amd5355@educcomp01: ~/Website[01;32mamd5355@educcomp01[00m:[01;34m~/Website[00m$ 
+]0;/stor/home/amd5355/Website]0;amd5355@educcomp01: ~/Website[01;32mamd5355@educcomp01[00m:[01;34m~/Website[00m$ git init #initialize local git resposiitory
+Reinitialized existing Git repository in /stor/home/amd5355/Website/.git/
+]0;/stor/home/amd5355/Website]0;amd5355@educcomp01: ~/Website[01;32mamd5355@educcomp01[00m:[01;34m~/Website[00m$ git add . #add all files in repositoryy to be uploaded

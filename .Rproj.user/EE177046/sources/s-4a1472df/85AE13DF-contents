@@ -4,3 +4,11 @@ install.packages("blogdown")
 blogdown::install_hugo()
 
 blogdown::new_site(theme="nurlansu/hugo-sustain")
+
+cd ~/Desktop/Website #if you haven't already
+
+git init #initialize local git respository
+git add . #add all files in repository to be uploaded
+git commit -m "first website commit"
+git remote add origin https://github.com/anadandy/Website.git #re
+git push origin master
