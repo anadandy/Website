@@ -255,4 +255,41 @@ Username for 'https://github.com': anadn andy
 Password for 'https://anadandy@github.com': 
 remote: Repository not found.
 fatal: repository 'https://github.com/USERNAME/WEBSITE_REPOSITORY.git/' not found
+]0;/stor/home/amd5355/Website]0;amd5355@educcomp01: ~/Website[01;32mamd5355@educcomp01[00m:[01;34m~/Website[00m$ cd ~/Desktop/Website #if you haven't aalready
+bash: cd: /stor/home/amd5355/Desktop/Website: No such file or directory
 ]0;/stor/home/amd5355/Website]0;amd5355@educcomp01: ~/Website[01;32mamd5355@educcomp01[00m:[01;34m~/Website[00m$ 
+]0;/stor/home/amd5355/Website]0;amd5355@educcomp01: ~/Website[01;32mamd5355@educcomp01[00m:[01;34m~/Website[00m$ git init #initialize local git resposiitory
+Reinitialized existing Git repository in /stor/home/amd5355/Website/.git/
+]0;/stor/home/amd5355/Website]0;amd5355@educcomp01: ~/Website[01;32mamd5355@educcomp01[00m:[01;34m~/Website[00m$ git add . #add all files in repositoryy to be uploaded
+]0;/stor/home/amd5355/Website]0;amd5355@educcomp01: ~/Website[01;32mamd5355@educcomp01[00m:[01;34m~/Website[00m$ git commit -m "first website commit"
+[master a274411] first website commit
+ Committer: Ana Dandy <amd5355@educcomp01.ccbb.utexas.edu>
+Your name and email address were configured automatically based
+on your username and hostname. Please check that they are accurate.
+You can suppress this message by setting them explicitly. Run the
+following command and follow the instructions in your editor to edit
+your configuration file:
+
+    git config --global --edit
+
+After doing this, you may fix the identity used for this commit with:
+
+    git commit --amend --reset-author
+
+ 1 file changed, 24 insertions(+)
+]0;/stor/home/amd5355/Website]0;amd5355@educcomp01: ~/Website[01;32mamd5355@educcomp01[00m:[01;34m~/Website[00m$ git remote add origin https://github.ccom/anadandy/Website.git #re
+fatal: remote origin already exists.
+]0;/stor/home/amd5355/Website]0;amd5355@educcomp01: ~/Website[01;32mamd5355@educcomp01[00m:[01;34m~/Website[00m$ git push origin master
+Username for 'https://github.com': anadad ndy
+Password for 'https://anadandy@github.com': 
+remote: Repository not found.
+fatal: repository 'https://github.com/USERNAME/WEBSITE_REPOSITORY.git/' not found
+]0;/stor/home/amd5355/Website]0;amd5355@educcomp01: ~/Website[01;32mamd5355@educcomp01[00m:[01;34m~/Website[00m$ cd ~/stor/home/amd5355/Website #if youu haven't already
+bash: cd: /stor/home/amd5355/stor/home/amd5355/Website: No such file or directory
+]0;/stor/home/amd5355/Website]0;amd5355@educcomp01: ~/Website[01;32mamd5355@educcomp01[00m:[01;34m~/Website[00m$ 
+]0;/stor/home/amd5355/Website]0;amd5355@educcomp01: ~/Website[01;32mamd5355@educcomp01[00m:[01;34m~/Website[00m$ git init #initialize local git resposiitory
+epository to be uploaded
+git commit -m "first website commit"
+git remote add origin https://github.com/anadandy/Website.git #re
+git push origin masterReinitialized existing Git repository in /stor/home/amd5355/Website/.git/
+]0;/stor/home/amd5355/Website]0;amd5355@educcomp01: ~/Website[01;32mamd5355@educcomp01[00m:[01;34m~/Website[00m$ git add . #add all files in repositoryy to be uploaded
