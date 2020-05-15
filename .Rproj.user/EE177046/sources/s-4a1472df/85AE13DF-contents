@@ -12,3 +12,13 @@ git add . #add all files in repository to be uploaded
 git commit -m "first website commit"
 git remote add origin https://github.com/anadandy/Website.git #re
 git push origin master
+
+set-url
+
+library(ggplot2)
+as.numeric(py$dog_height)
+as.numeric(py$dog_weight)
+mean(py$dog_height)
+ggplot()+geom_point(aes(py$dog_height,py$dog_weight))
+py$dog_height
+py$dog_height['dachshund']

@@ -1,0 +1,55 @@
+---
+title: 'Blog Post #1'
+author: ''
+date: '2020-05-15'
+slug: blog-post-1
+categories: []
+tags: []
+description: ''
+---
+
+
+
+<div class="figure">
+<img src="/blog/2020-05-15-blog-post-1_files/weenie.gif" />
+
+</div>
+<pre class="python"><code>#dog breeds average height (in) and weight (lbs)
+#python code
+dog_height ={
+&#39;dachshund&#39;: 8,
+&#39;great dane&#39;: 32,
+&#39;boxer&#39;: 23,
+&#39;corgi&#39;: 11,
+}
+
+dog_height</code></pre>
+<pre><code>## {&#39;corgi&#39;: 11, &#39;boxer&#39;: 23, &#39;dachshund&#39;: 8, &#39;great dane&#39;: 32}</code></pre>
+<pre class="python"><code>dog_weight = {
+&#39;dachshund&#39;: 20,
+&#39;great dane&#39;: 120,
+&#39;boxer&#39;: 60,
+&#39;corgi&#39;: 27,
+}
+
+dog_weight</code></pre>
+<pre><code>## {&#39;corgi&#39;: 27, &#39;boxer&#39;: 60, &#39;dachshund&#39;: 20, &#39;great dane&#39;: 120}</code></pre>
+<pre class="r"><code>#R code
+library(reticulate)
+py$dog_height[&#39;dachshund&#39;]</code></pre>
+<pre><code>## $dachshund
+## [1] 8</code></pre>
+<pre class="r"><code>py$dog_height$dachshund</code></pre>
+<pre><code>## [1] 8</code></pre>
+<pre class="r"><code>py$dog_height</code></pre>
+<pre><code>## $corgi
+## [1] 11
+## 
+## $boxer
+## [1] 23
+## 
+## $dachshund
+## [1] 8
+## 
+## $`great dane`
+## [1] 32</code></pre>
